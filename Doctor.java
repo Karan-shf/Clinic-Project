@@ -22,7 +22,7 @@ class Doctor extends Person {
     public Doctor(String firstName, String lastName, int workExperience, String specialty, int ID, int income_In_Month,
     		 String password, String status , boolean has_massage ,float rating , int ratingNum ) {
         
-    	super(firstName, lastName, ID, password);
+    	super(firstName, lastName, ID, password , status);
     	
         WorkExperience = workExperience;
         Specialty = specialty;
@@ -91,13 +91,19 @@ class Doctor extends Person {
     }
     
     public void  ViewPreviousePrescriptions() {
-    	// extract prescriptions with same doctor id as ours and call the to string 
+    	// extract prescriptions with same doctor id as ours and call the to string
+    	if(DataBase.VisitsFilteredByID.size() == 0) {
+    		DataBase.Import_Filtered_Visits(this.getID() , "DoctorID");
+    	}
+    	for(Visit visit :DataBase.VisitsFilteredByID ) {
+    		visit.ShowVisit();
+    		System.out.println("-----------------------------------" + "\n");
+    	}
+    	
     	
     }
     
-    public void TakeLeave() {
-    	
-    }
+
     
     public void Visit() {
     	try {
@@ -161,11 +167,13 @@ class Doctor extends Person {
     		switch(num) {
     		case 1 :
     			System.out.println("Choose Your Nurse");
-    			
-    			DataBase.ImportNurses(true);
-    			for(int i = 0 ; i < DataBase.Nurses.size() ; i++) {
-    				System.out.println((i+1) + " " + DataBase.Nurses.get(i).toString());
+    			if(DataBase.Nurses.size() == 0 ) {
+    				DataBase.ImportNurses(true);
+        			for(int i = 0 ; i < DataBase.Nurses.size() ; i++) {
+        				System.out.println((i+1) + " " + DataBase.Nurses.get(i).toString());
+        			}
     			}
+    			
     			
     			int num2 = int_input.nextInt();
     			
@@ -183,13 +191,24 @@ class Doctor extends Person {
     		
     		price = int_input.nextInt();
     		
-    		this.VisitPrice = price ;
+    		double paymentRate = 1 ;
+    		
+    		String sql2 = "SELECt IsEmergency FROM waitinglist " ;
+    		PreparedStatement preparedStatement2 = Connector.Connect().prepareStatement(sql2);
+    		ResultSet resultSet2 = preparedStatement2.executeQuery();
+    		resultSet2.next();
+    		
+    		if(resultSet2.getBoolean(1)) {
+    			paymentRate = 1.2 ;
+    		}
+    		
+    		this.VisitPrice = (int)(price * paymentRate) ;
     		this.AddSalary();
     		
     		// Connection connection = Connector.Connect();
     		
 
-    		Visit visit = new Visit(ID ,mySQLDate ,prescription ,resultSet.getInt(3), this.getID(), price ,false , nurseID  );
+    		Visit visit = new Visit(ID ,mySQLDate ,prescription ,PatientID, this.getID(), price ,false , nurseID  );
     		DataBase.InsertVisit(visit);
     		
        		// String sql5 = "select PatientID from waitinglist where DoctorID = ? ";
@@ -356,11 +375,13 @@ class Doctor extends Person {
         System.out.println("please wait for admin confirmation");
        
     }
+ 
 
 
 	@Override
 	public void View_personal_info() {
-		
+		System.out.println("----------------------------\n");
+		System.out.println("Doctor Status : " + status );
 		System.out.println("ID  : " + this.getID() );
 		System.out.println("Name : " + this.getFirstName() + " " + this.getLastName());
 		System.out.println("Specialty : " + this.getSpecialty());

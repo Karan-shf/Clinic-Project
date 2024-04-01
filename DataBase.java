@@ -1,7 +1,7 @@
 import java.sql.*;
 import java.util.ArrayList;
 
-public abstract class DataBase {
+public abstract class DataBase implements IDataBase {
 	
 	static void InsertVisit(Visit visit) {
 		try {
@@ -26,7 +26,7 @@ public abstract class DataBase {
 	}
 	
 	static void InsertNurse(Nurse nurse) {
-		String sql = " insert into nurses values(?,?,?,?,?,?,?,?,?,?)";
+		String sql = " insert into nurses values(?,?,?,?,?,?,?,?,?)";
 			
 		try {
 			
@@ -40,8 +40,8 @@ public abstract class DataBase {
 			preparedStatement.setInt(6, nurse.getPaid_leave());
 			preparedStatement.setString(7,nurse.getPassword());
 			preparedStatement.setString(8, nurse.getStatus());
-			preparedStatement.setInt(9, nurse.getSalaryPerCheckin());
-			preparedStatement.setDate(10,nurse.getRegisterDate());
+			// preparedStatement.setInt(9, nurse.getSalaryPerCheckin());
+			preparedStatement.setDate(9,nurse.getDateGuide());
 			preparedStatement.executeUpdate();
 		}
 		catch(Exception e) {
@@ -80,7 +80,7 @@ public abstract class DataBase {
 	
 	
 	static public void InsertPersonel(Personel personel){
-		String sql = " insert into personel values(?,?,?,?,?,?,?,?,?,?)";
+		String sql = " insert into personel values(?,?,?,?,?,?,?,?,?)";
 		
 		try {
 			
@@ -95,7 +95,6 @@ public abstract class DataBase {
 			preparedStatement.setString(7, personel.getStatus());
 			preparedStatement.setString(8, personel.getJob());
 			preparedStatement.setDate(9,personel.getRegisterDate());
-			preparedStatement.setInt(10, Personel.SalaryPerCheckin(personel.getJob()));
 			
 			preparedStatement.executeUpdate();
 		}
@@ -110,6 +109,7 @@ public abstract class DataBase {
 	static ArrayList <Patient> Patients = new ArrayList<Patient>();
 	static ArrayList <Personel> PersonelList = new ArrayList<Personel>();
 	static ArrayList <Visit> Visits = new ArrayList<Visit>();
+	static ArrayList<Visit> VisitsFilteredByID = new ArrayList<>();
 	
 	static void ImportDoctors(boolean filter) {
 	
@@ -125,7 +125,7 @@ public abstract class DataBase {
 		int ratingNum = 1 ;
 		float rating = 0;
 
-		String sql = "SELECT * FROM doctors";
+		String sql = "SELECT * FROM doctors ORDER BY Specialty , Rating DESC";
 		
 		try {
 			PreparedStatement preparedStatement = Connector.Connect().prepareStatement(sql);
@@ -183,15 +183,15 @@ public abstract class DataBase {
 				String Password = resultSet.getString(7);
 				String Status = resultSet.getString(8);
 				int SalaryPerCheckin = Nurse.SalaryPerCheckin(WorkExperiance);
-				Date RegisterDate = resultSet.getDate(10);
+				Date DateGuide = resultSet.getDate(9);
 				
 				if (filter) {
 					if (Status.equals("is working")){
-						Nurse nurse = new Nurse (Firstname, Lastname, WorkExperiance, ID , Salary ,  PaidLeave ,  Password , Status , SalaryPerCheckin , RegisterDate);
+						Nurse nurse = new Nurse (Firstname, Lastname, WorkExperiance, ID , Salary ,  PaidLeave ,  Password , Status , SalaryPerCheckin , DateGuide);
 						Nurses.add(nurse);
 					}
 				} else {
-					Nurse nurse = new Nurse (Firstname, Lastname, WorkExperiance, ID , Salary ,  PaidLeave ,  Password , Status , SalaryPerCheckin , RegisterDate);
+					Nurse nurse = new Nurse (Firstname, Lastname, WorkExperiance, ID , Salary ,  PaidLeave ,  Password , Status , SalaryPerCheckin , DateGuide);
 					Nurses.add(nurse);
 				}
 			}
@@ -224,8 +224,8 @@ public abstract class DataBase {
 				int ID = rs.getInt(3);
 				String Insurance = rs.getString(4);
 				String Password = rs.getString(5);
-				boolean  HasMassage = rs.getBoolean(6) ;
-				Patient patient = new Patient ( Firstname , Lastname , ID , Insurance,Password ,HasMassage );
+				String  Status = rs.getString(6) ;
+				Patient patient = new Patient ( Firstname , Lastname , ID , Insurance,Password ,Status );
 				Patients.add(patient);
 			}
 			
@@ -326,6 +326,7 @@ public abstract class DataBase {
 		String Firstname=null;
 		String Lastname=null;
 		boolean hasMassage = false ;
+		String status = null ;
 		String sql = "SELECT * FROM admins WHERE ID=?";
 			
 		try {
@@ -338,11 +339,53 @@ public abstract class DataBase {
 			Firstname = resultSet.getString(3);
 			Lastname = resultSet.getString(4);
 			hasMassage = resultSet.getBoolean(5);
+			status = resultSet.getString(6);
 		} 
 		catch (Exception e) {
 			e.printStackTrace();
 		}
-		return new Admin(ID, Password, Firstname, Lastname , hasMassage);
+		return new Admin(ID, Password, Firstname, Lastname , hasMassage , status);
+	}
+	
+	static void Import_Filtered_Visits(int EmployeeID , String column ) {
+		String sql = "SELECT * FROM visits WHERE " + column +  "= ?";
+		
+		int ID = 0;
+		Date Date = null;
+		String Prescription = null;
+		int PatientID = 0;
+		int DoctorID = 0;
+		int Price= 0;
+		boolean IsRated = false;
+		int NurseID = 0 ;
+		
+		try {
+			PreparedStatement preparedStatement = Connector.Connect().prepareStatement(sql);
+			preparedStatement.setInt(1, EmployeeID);
+			ResultSet resultSet = preparedStatement.executeQuery();
+			while(resultSet.next()) {
+				ID = resultSet.getInt(1);
+				Date = resultSet.getDate(2);
+				Prescription = resultSet.getString(3);
+				PatientID = resultSet.getInt(4);
+				DoctorID = resultSet.getInt(5);
+				Price= resultSet.getInt(6);
+				IsRated = resultSet.getBoolean(7);
+				NurseID = resultSet.getInt(8);
+				
+				Visit visit =  new Visit(ID , Date , Prescription , PatientID , DoctorID , Price , IsRated , NurseID);
+				
+				VisitsFilteredByID.add(visit);
+			}
+			
+			
+			
+		}
+		catch(Exception e) {
+			e.printStackTrace();
+		}
+		
+		
 	}
 
 	static Doctor Extract_Doctor(int primary_key){
@@ -393,11 +436,10 @@ public abstract class DataBase {
 		int ID=0;
 		int salary=0;
 		int paid_leave=0;
-		int unpaid_leave=0;
 		String Password=null;
 		String Status=null;
 		int SalaryPerDay = 0 ;
-		Date RegisterDate = null ;
+		Date DateGuide = null ;
 		String sql = "SELECT * FROM nurses WHERE ID=?";
 		
 		try {
@@ -414,13 +456,13 @@ public abstract class DataBase {
 			Password = resultSet.getString(7);
 			Status = resultSet.getString(8);
 			SalaryPerDay = Nurse.SalaryPerCheckin(WorkExperiance);
-			RegisterDate = resultSet.getDate(10);
+			DateGuide = resultSet.getDate(9);
 			
 		} 
 		catch (Exception e) {
 			e.printStackTrace();
 		}
-		return new Nurse(FirstName, LastName, WorkExperiance, ID, salary, paid_leave, Password, Status , SalaryPerDay , RegisterDate);
+		return new Nurse(FirstName, LastName, WorkExperiance, ID, salary, paid_leave, Password, Status , SalaryPerDay , DateGuide);
 	}
 
 	static Personel Extract_Personel(int primary_key){
@@ -460,6 +502,8 @@ public abstract class DataBase {
 		return new Personel(Firstname, Lastname, ID, Salary, PaidLeave, Password, Status , Job , RegisterPerDay , SalaryPerDay);
 	}
 
+	
+	
 	static Patient Extract_Patient(int primary_key){
 		
 		String Firstname = null;
@@ -467,7 +511,7 @@ public abstract class DataBase {
 		int ID = 0;
 		String Insurance = null;
 		String Password = null;
-		boolean HasMassage = false ;
+		String Status = null ;
 		String sql = "SELECT * FROM patients WHERE ID=?";
 
 		try {
@@ -480,12 +524,15 @@ public abstract class DataBase {
 			ID = resultSet.getInt(3);
 			Insurance = resultSet.getString(4);
 			Password = resultSet.getString(5);
-			HasMassage = resultSet.getBoolean(6);
+			Status = resultSet.getString(6);
 		}
+		
 		catch (Exception e) {
-			e.printStackTrace();
+			System.out.println("WARNING ! ");
+			System.out.println("You Probably have a null field in your accound if not so un comment the e.printstacktrace ");
+			//e.printStackTrace();
 		}
-		return new Patient(Firstname, Lastname, ID, Insurance, Password ,HasMassage);
+		return new Patient(Firstname, Lastname, ID, Insurance, Password ,Status);
 	}
 
 	static void Update(String table_name,String updatedParameter,String updatedValue,int ID) {

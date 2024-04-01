@@ -1,4 +1,5 @@
 import java.sql.*;
+import java.util.InputMismatchException;
 // import java.sql.PreparedStatement;
 // import java.sql.Statement;
 // import java.util.ArrayList;
@@ -18,8 +19,22 @@ public class Login {
 
 			boolean ID_check=false;
 			while (!ID_check){
+				
 				System.out.println("Enter Your ID:");
-				int ID = int_input.nextInt();
+				int ID = 0;
+				boolean accepted = false;
+				while(!accepted) {
+					Scanner int_input2 = new Scanner(System.in);
+					try {
+						ID = int_input2.nextInt();
+						accepted = true ;
+					}
+					catch(InputMismatchException e) {
+						System.out.println("Please Enter an Integer");
+					}
+				}
+				
+				
 				resultSet.beforeFirst();
 				// resultSet.absolute(1);
 				while (resultSet.next()) {
@@ -156,8 +171,9 @@ public class Login {
 				resultSet.beforeFirst();
 		
 				while (resultSet.next()) {
+					// if (ID.equals(resultSet.getString(1)) && resultSet.getString(2).equals("is working")){
 
-					if (ID.equals(resultSet.getString(1)) && resultSet.getString(2).equals("is working")){
+					if (ID.equals(resultSet.getString(1))){
 						ID_check = true;
 						break;
 					}
@@ -271,7 +287,7 @@ public class Login {
 
 		Scanner strnig_input = new Scanner(System.in);
 
-		String sql = "SELECT ID FROM patients";
+		String sql = "SELECT ID FROM patients WHERE Status !='is resignated'";
 
         try {
 

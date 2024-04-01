@@ -3,21 +3,17 @@ import java.util.ArrayList;
 import java.util.Scanner;
 import java.util.concurrent.ThreadLocalRandom;
 
-import javax.sound.midi.SysexMessage;
-
 
 class Patient extends Person {
 
     
     private String insurance;
     
-    private boolean hasMassage;
-    public Patient(String firstName, String lastname, int iD, String insurance, String password , boolean hasMassage) {
-    	super(firstName, lastname, iD, password);
+    public Patient(String firstName, String lastname, int iD, String insurance, String password , String Status) {
+    	super(firstName, lastname, iD, password , Status);
         
         this.insurance = insurance;
       
-        this.hasMassage = hasMassage;
     }
 
     
@@ -25,12 +21,7 @@ class Patient extends Person {
         return insurance;
     }
     
-    public boolean HasMassage() {
-    	return hasMassage;
-    }
-    public void SetHasMassage(boolean HasMassage) {
-    	this.hasMassage = HasMassage;
-    }
+    
     
     //registery
     // public patient(){
@@ -96,7 +87,7 @@ class Patient extends Person {
             preparedStatement.setInt(3, ID);
             preparedStatement.setString(4, insurance);
             preparedStatement.setString(5, Password);
-            preparedStatement.setBoolean(6, false);
+            preparedStatement.setBoolean(6, true);
             preparedStatement.executeUpdate();
 
             Connector.close_connection();
@@ -104,7 +95,7 @@ class Patient extends Person {
             System.out.println("REGISTERY SUCCESFULL");
             System.out.println("Your ID: "+ID);
             
-            Patient patient = new Patient(FirstName , Lastname , ID , insurance , Password , false );
+            Patient patient = new Patient(FirstName , Lastname , ID , insurance , Password , "is user" );
             
             Dashboard.Patient(patient);
 
@@ -115,7 +106,7 @@ class Patient extends Person {
     
         
 
-        new Patient(FirstName, Lastname, ID, insurance, Password , false);
+        new Patient(FirstName, Lastname, ID, insurance, Password , "is user");
 
     }
 
@@ -143,7 +134,34 @@ class Patient extends Person {
 		
 		Scanner int_input = new Scanner(System.in);
         Scanner string_input = new Scanner(System.in);
+        boolean emergency = false ;
+        boolean accepted = false ;
 		int num = int_input.nextInt();
+		
+		System.out.println("Is This an Emergency ?");
+		System.out.println(" 1 ) Yes Put Me Higher On Waiting List With The Payment Raise Of 20% ");
+		System.out.println(" 2 ) No ");
+		
+		while(!accepted) {
+			int num2 =int_input.nextInt();
+			switch(num2) {
+			case 1 :
+				emergency = true ;
+				accepted = true ;
+				break;
+				
+			case 2 : 
+				
+				emergency = false ;
+				accepted = true ;
+				break;
+			
+			default :
+				System.err.println("Wrong Input");
+			}
+			
+			  				
+		}
 		
 		Doctor doctor = DataBase.Doctors.get(num-1);
 
@@ -163,14 +181,43 @@ class Patient extends Person {
                 waitinglist_num++;
             }
             
-			String sql = "insert into waitinglist(DoctorID,PatientID,Details) values(?,?,?)";
-			PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            if(emergency) {
+            	int waitingListID = 1;
+            	boolean accepted2 = false;
+            	while(!accepted2) {
+            		try {
+                		String sql = "insert into waitinglist values(?,?,?,?,?)";
+            			PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            			preparedStatement.setInt(1, waitingListID );
+            			preparedStatement.setInt(2, doctor.getID() );
+            			preparedStatement.setInt(3, this.getID());
+                        preparedStatement.setString(4, details);
+                        preparedStatement.setBoolean(5, emergency);
+            			
+            			preparedStatement.executeUpdate();
+            			accepted2 = true ;
+                		
+                	}
+                	catch(java.sql.SQLIntegrityConstraintViolationException e){
+                		
+                		waitingListID++;
+                		
+                	}
+            	}
+            	
+            }else {
+            	String sql = "insert into waitinglist(DoctorID,PatientID,Details , IsEmergency) values(?,?,?,?)";
+    			PreparedStatement preparedStatement = connection.prepareStatement(sql);
+    			
+    			preparedStatement.setInt(1, doctor.getID() );
+    			preparedStatement.setInt(2, this.getID());
+                preparedStatement.setString(3, details);
+                preparedStatement.setBoolean(4, emergency);
+    			
+    			preparedStatement.executeUpdate();
+            }
+            
 			
-			preparedStatement.setInt(1, doctor.getID() );
-			preparedStatement.setInt(2, this.getID());
-            preparedStatement.setString(3, details);
-			
-			preparedStatement.executeUpdate();
 			
 			String sql2 = "Update Doctors set HasMassage = 1 where ID = ? ";
 			PreparedStatement preparedStatement2 = connection.prepareStatement(sql2);
@@ -337,6 +384,8 @@ class Patient extends Person {
 			switch(num) {
 			
 			case 1 :
+				System.out.println("Enter the New Firstname");
+				
 				String newFirstName = String_input.nextLine();
 				this.setFirstName(newFirstName);
 				
@@ -346,6 +395,8 @@ class Patient extends Person {
 				break ;
 			
 			case 2 :
+				System.out.println("Enter the New Lastname");
+				
 				String newLastName = String_input.nextLine();
 				this.setLastName(newLastName);
 				
@@ -356,16 +407,16 @@ class Patient extends Person {
 			
 			case 3 :
 				
-				System.out.println("Enter You Old Password : ");
-				String password = String_input.nextLine();
-				String sql = "SELECT Password FROM " + table + " WHERE ID = ?";
-				try {
-					PreparedStatement preparedStatement = Connector.Connect().prepareStatement(sql);
-					preparedStatement.setInt(1, this.getID());
-					ResultSet resultSet = preparedStatement.executeQuery();
-					resultSet.next();
-					boolean accepted2 = false ;
-					while(!accepted2){
+            String sql = "SELECT Password FROM " + table + " WHERE ID = ?";
+            try {
+                PreparedStatement preparedStatement = Connector.Connect().prepareStatement(sql);
+                preparedStatement.setInt(1, this.getID());
+                ResultSet resultSet = preparedStatement.executeQuery();
+                resultSet.next();
+                boolean accepted2 = false ;
+                while(!accepted2){ 
+                        System.out.println("Enter You Old Password : ");
+                        String password = String_input.nextLine();
 						if(password.equals(resultSet.getString(1))) {
 							System.out.println("Now Enter the New Password");
 							String newPassword = String_input.nextLine();
@@ -433,6 +484,14 @@ class Patient extends Person {
 		}
 			
 	}
+    
+    public void View_Patient() {
+    	
+         System.out.println("Name: "+this.getFirstName()+" "+this.getLastName());
+         System.out.println("ID: "+this.getID());
+         System.out.println("Password: "+this.getPassword());
+         System.out.println("Insurance: "+this.getInsurance());
+    }
 
     @Override
     public void View_personal_info() {
@@ -456,15 +515,47 @@ class Patient extends Person {
                 case 1:
                     //visit
                     System.out.println("\nYour Visit History:");
-                    DataBase.ImportVisits();
-                    for (int i=0;i<DataBase.Visits.size();i++){
+                    // DataBase.ImportVisits();
+                    // for (int i=0;i<DataBase.Visits.size();i++){
                         
-                        if (DataBase.Visits.get(i).getPatientID()==this.getID()) {
-                            DataBase.Visits.get(i).ShowVisit();
+                    //     if (DataBase.Visits.get(i).getPatientID()==this.getID()) {
+                    //         DataBase.Visits.get(i).ShowVisit();
+                    //     }
+                    //     if (i != DataBase.Visits.size()-1) {
+                    //         System.out.println("------------------------------------");
+                    //     }
+                    // }
+                    ArrayList <Visit> PatientsVisits  =new ArrayList<Visit>();
+                    String sql = "SELECT * FROM visits WHERE PatientID=?";
+                    try {
+                        PreparedStatement PreparedStatement = Connector.Connect().prepareStatement(sql);
+                        PreparedStatement.setInt(1, this.getID());
+                        ResultSet resultSet = PreparedStatement.executeQuery();
+                        while(resultSet.next()) {
+                            int ID = resultSet.getInt(1);
+                            Date Date = resultSet.getDate(2);
+                            String Prescription = resultSet.getString(3);
+                            int PatientID = resultSet.getInt(4);
+                            int DoctorID = resultSet.getInt(5);
+                            int Price= resultSet.getInt(6);
+                            boolean IsRated = resultSet.getBoolean(7);
+                            int NurseID = resultSet.getInt(8);
+                            Visit visit = new Visit(ID , Date , Prescription , PatientID , DoctorID , Price , IsRated , NurseID);
+                            PatientsVisits.add(visit);
+                            
                         }
-                        if (i != DataBase.Visits.size()-1) {
-                            System.out.println("------------------------------------");
+                        if (PatientsVisits.size()==0) {
+                            System.out.println("you have no visit history !!");
+                        } else {
+                            for (int i=0;i<PatientsVisits.size();i++) {
+                                PatientsVisits.get(i).ShowVisit();
+                                if (i != PatientsVisits.size()-1) {
+                                    System.out.println("------------------------------------");
+                                }
+                            }
                         }
+                    } catch (Exception e) {
+                        e.printStackTrace();
                     }
                     Check = false;
                     break;
@@ -477,5 +568,5 @@ class Patient extends Person {
         }
 
     }
-    
+  
 }

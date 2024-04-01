@@ -8,12 +8,14 @@ public abstract class Person {
 	private String lastName;
 	private int ID;
 	private String password;
-	
-	public Person ( String firstName ,String lastName ,int ID ,String password ) {
+	 private String status;
+	 
+	public Person ( String firstName ,String lastName ,int ID ,String password , String status) {
 		this.firstName = firstName;
 		this.lastName = lastName ;
 		this.ID = ID;
 		this.password = password ;
+		this.status = status;
 	}
 	
 	public String getFirstName() {
@@ -23,6 +25,15 @@ public abstract class Person {
 	public String getLastName() {
 		return lastName;
 	}
+	
+	public String getStatus() {
+		return this.status;
+	}
+	
+	 public void setStatus(String status) {
+	    	this.status = status;
+	        
+	 }
 	
 	public int getID() {
 		return ID ;
@@ -60,6 +71,7 @@ public abstract class Person {
 			switch(num) {
 			
 			case 1 :
+				System.out.println("Enter the New Firstname");
 				String newFirstName = String_input.nextLine();
 				this.setFirstName(newFirstName);
 				
@@ -69,6 +81,7 @@ public abstract class Person {
 				break ;
 			
 			case 2 :
+				System.out.println("Enter the New Lirstname");
 				String newLastName = String_input.nextLine();
 				this.setLastName(newLastName);
 				
@@ -125,6 +138,13 @@ public abstract class Person {
 			
 	}
 
-	  
+	public void Resignate(String table) {
+		
+		DataBase.Update(table, "Status", "is resignated" , this.getID());
+	}
+	
+	public void SetStatusLIL(String status){
+		this.status = status;
+	}
 	  
 }

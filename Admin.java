@@ -8,8 +8,8 @@ class Admin extends Person  {
 
     private boolean hasMassage;
 
-    public Admin(int ID, String password,String firstName,String lastName , boolean hasMassage) {
-    	super(firstName, lastName, ID, password);
+    public Admin(int ID, String password,String firstName,String lastName , boolean hasMassage , String status) {
+    	super(firstName, lastName, ID, password , status);
         this.hasMassage = hasMassage;
         
     }
@@ -40,8 +40,8 @@ class Admin extends Person  {
 				int PaidLeave = resultSet.getInt(6);
 				String Password = resultSet.getString(7);
 				String Status = resultSet.getString(8);
-				int SalaryPerCheckin = resultSet.getInt(9);
-				Date RegisterDate = resultSet.getDate(10);
+				int SalaryPerCheckin = Nurse.SalaryPerCheckin(WorkExperiance);
+				Date RegisterDate = resultSet.getDate(9);
 				
 				Nurse nurse = new Nurse (Firstname, Lastname, WorkExperiance, ID , Salary ,  PaidLeave ,  Password , Status , SalaryPerCheckin , RegisterDate);
                 undecided_Nurses.add(nurse);
@@ -50,7 +50,7 @@ class Admin extends Person  {
             e.printStackTrace();
         }
 
-        Scanner string_input = new Scanner(System.in);
+        
 
         System.out.println("There are "+undecided_Nurses.size()+" Nurses Waiting to be added to clinic\n");
 
@@ -61,14 +61,18 @@ class Admin extends Person  {
             System.out.println("[1].Accept\n[2].Reject");
             boolean check = true;
             while (check) {
+            	Scanner string_input = new Scanner(System.in);
                 String answer = string_input.next();
                 switch (answer) {
                     case "1":
                         undecided_Nurses.get(i).setStatus("is working"); 
                         check=false;
+                        
+                        System.out.println("Nurse Was Added Secuessfully \n");
                         break;
                     case "2":
-                        undecided_Nurses.get(i).setStatus("rejected"); 
+                        undecided_Nurses.get(i).SetStatusLIL("rejected"); 
+                        System.out.println("Nurse Was Rejected Secuessfully \n");
                         check=false;
                         break;
                     default:
@@ -107,8 +111,9 @@ class Admin extends Person  {
 
     @Override
     public void View_personal_info() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'View_personal_info'");
+    	System.out.println("ID  : " + this.getID() );
+		System.out.println("Name : " + this.getFirstName() + " " + this.getLastName());
+		
     }
     
     public void AddDoctor() {
@@ -249,13 +254,13 @@ class Admin extends Person  {
 	
 	public void FireDoctor() {
 
-        if (DataBase.Doctors.size() != 0) {DataBase.ImportDoctors(true);}
+        if (DataBase.Doctors.size() == 0) {DataBase.ImportDoctors(true);}
 
         Scanner int_input = new Scanner(System.in);
 
         System.out.println("Doctors List:");
         for (int i=0;i<DataBase.Doctors.size();i++){
-            System.out.println(DataBase.Doctors.get(i));
+        	DataBase.Doctors.get(i).View_personal_info();
             if (i != DataBase.Doctors.size()-1) {
                 System.out.println("------------------------------------");
             }
@@ -296,13 +301,13 @@ class Admin extends Person  {
 	
 	public void FireNurse() {
 
-		if (DataBase.Nurses.size() != 0) {DataBase.ImportNurses(true);}
+		if (DataBase.Nurses.size() == 0) {DataBase.ImportNurses(true);}
 
         Scanner int_input = new Scanner(System.in);
 
         System.out.println("Nurses List:");
         for (int i=0;i<DataBase.Nurses.size();i++){
-            System.out.println(DataBase.Nurses.get(i));
+           DataBase.Nurses.get(i).View_personal_info();
             if (i != DataBase.Nurses.size()-1) {
                 System.out.println("------------------------------------");
             }
@@ -320,7 +325,7 @@ class Admin extends Person  {
                 for (int i=0;i<DataBase.Nurses.size();i++) {
                     if (DataBase.Nurses.get(i).getID()==nurseID) {
                         DataBase.Update("nurses","Status", "fired", nurseID);
-                        System.out.println("doctor was fired succesfully");
+                        System.out.println("Nurse Was Fired Succesfully");
                         check = false;
                         break;
                     }
@@ -342,13 +347,13 @@ class Admin extends Person  {
 	
 	public void FirePersonel() {
 
-		if (DataBase.PersonelList.size() != 0) {DataBase.ImportPersonel(true);}
+		if (DataBase.PersonelList.size() == 0) {DataBase.ImportPersonel(true);}
 
         Scanner int_input = new Scanner(System.in);
 
         System.out.println("Personel List:");
         for (int i=0;i<DataBase.PersonelList.size();i++){
-            System.out.println(DataBase.PersonelList.get(i));
+            DataBase.PersonelList.get(i).View_personal_info();
             if (i != DataBase.PersonelList.size()-1) {
                 System.out.println("------------------------------------");
             }
@@ -366,7 +371,7 @@ class Admin extends Person  {
                 for (int i=0;i<DataBase.PersonelList.size();i++) {
                     if (DataBase.PersonelList.get(i).getID()==personelID) {
                         DataBase.Update("personel","Status", "fired", personelID);
-                        System.out.println("doctor was fired succesfully");
+                        System.out.println("personel was fired succesfully");
                         check = false;
                         break;
                     }
@@ -389,21 +394,22 @@ class Admin extends Person  {
 	
 	
 	public void ViewAllEmployeeInformation() {
+
 		System.out.println("Enter [1] to view alllll employee records");
         System.out.println("Enter [2] to view all working doctors records");
         System.out.println("Enter [3] to view all working nurses records");
         System.out.println("Enter [4] to view all working personal records");
         System.out.println("Enter [5] to view all patients records");
         
-        Scanner int_input = new Scanner(System.in);
-
+       
         boolean check = true;
-
+        int num;
         while (check) {
 
             try {
-                int num = int_input.nextInt();
-
+            	Scanner int_input = new Scanner(System.in);
+                num = int_input.nextInt();
+                
                 switch (num) {
                     case 1:
                         DataBase.Doctors.clear();
@@ -413,7 +419,7 @@ class Admin extends Person  {
                         DataBase.ImportNurses(false);
                         DataBase.ImportPersonel(false);
 
-                        System.out.println("Doctors Record:");
+                        System.out.println("Doctors Record : \n");
                         for (int i=0;i<DataBase.Doctors.size();i++) {
                             DataBase.Doctors.get(i).View_personal_info();
                             if (i != DataBase.Doctors.size()-1) {
@@ -422,7 +428,7 @@ class Admin extends Person  {
                         }
                         System.out.println("==========================================");
 
-                        System.out.println("Nurses Record:");
+                        System.out.println("Nurses Record : \n");
                         for (int i=0;i<DataBase.Nurses.size();i++) {
                             // System.out.println(DataBase.Nurses.get(i));
                             DataBase.Nurses.get(i).View_personal_info();
@@ -432,7 +438,7 @@ class Admin extends Person  {
                         }
                         System.out.println("==========================================");
 
-                        System.out.println("Personel Record:");
+                        System.out.println("Personel Record : \n");
                         for (int i=0;i<DataBase.PersonelList.size();i++) {
                             // System.out.println(DataBase.PersonelList.get(i));
                             DataBase.PersonelList.get(i).View_personal_info();
@@ -444,7 +450,7 @@ class Admin extends Person  {
                         DataBase.Doctors.clear();
                         DataBase.Nurses.clear();
                         DataBase.PersonelList.clear();
-
+                        System.out.println("\n");
                         check=false;
                         break;
                     case 2:
@@ -457,6 +463,7 @@ class Admin extends Person  {
                                 System.out.println("-------------------------------------");
                             }
                         }
+                        System.out.println("\n");
                         check=false;
                         break;
                     case 3:
@@ -469,6 +476,7 @@ class Admin extends Person  {
                                 System.out.println("-------------------------------------");
                             }
                         }
+                        System.out.println("\n");
                         check=false;
                         break;
                     case 4:
@@ -481,6 +489,7 @@ class Admin extends Person  {
                                 System.out.println("-------------------------------------");
                             }
                         }
+                        System.out.println("\n");
                         check=false;
                         break;
                     case 5:
@@ -488,11 +497,15 @@ class Admin extends Person  {
                         System.out.println("Patients Record:");
                         for (int i=0;i<DataBase.Patients.size();i++) {
                             // System.out.println(DataBase.Patients.get(i));
-                            DataBase.Patients.get(i).View_personal_info();
+                            DataBase.Patients.get(i).View_Patient();
                             if (i != DataBase.Patients.size()-1) {
                                 System.out.println("-------------------------------------");
                             }
                         }
+                        System.out.println("\n");
+                        check=false;
+                        break ;
+                        
                     default:
                         System.out.println("Wrong Input!");
                 }
@@ -503,14 +516,104 @@ class Admin extends Person  {
                 e.printStackTrace();
             }
             
+        }
+
+	}
+
+    public void ChangeBaseSalary() {
+
+        
+        int newbaseSalary=0;
+        int num;
+        String sql="";
+        
+        System.out.println("enter the new base salary:");
+        
+        boolean checkint = true;
+        
+        while (checkint) {
+            try {
+                Scanner int_input = new Scanner(System.in);
+                newbaseSalary = int_input.nextInt();
+                checkint=false;
+            } catch (InputMismatchException e) {
+                System.out.println("please enter an integer");
+            } catch (Exception exception) {
+                exception.printStackTrace();
+            }
+        }
+
+        System.out.println("Which job's base salary do you want to change ?");
+        System.out.println(" 1.Nurse \n 2.Pharmacist \n 3.Secretary \n 4.Chef \n 5.Guard \n 6.Janitor");
+
+        boolean check = true;
+
+        while (check) {
+
+            try {
+
+                Scanner int_input = new Scanner(System.in);
+
+                num = int_input.nextInt();
+
+                switch (num) {
+                    case 1:
+                        sql = "UPDATE baseSalary SET Nurse=?";
+                        check = false;
+                        break;
+                    case 2:
+                        sql = "UPDATE baseSalary SET Pharmacist=?";
+                        check = false;
+                        break;
+                    case 3:
+                        sql = "UPDATE baseSalary SET Secretary=?";
+                        check = false;
+                        break; 
+                    case 4:
+                        sql = "UPDATE baseSalary SET Chef=?";
+                        check = false;
+                        break;
+                    case 5:
+                        sql = "UPDATE baseSalary SET Guard=?";
+                        check = false;
+                        break;
+                    case 6:
+                        sql = "UPDATE baseSalary SET Janitor=?";
+                        check = false;
+                        break;
+                    default:
+                        System.out.println("Wrong input");
+                }
+                
+                
+            } catch (InputMismatchException e) {
+                
+                System.out.println("please enter an integer");
+                
+            } catch (Exception e) {
+                
+                e.printStackTrace();
+                
+            }
+            
+        }
+        
+        try {
+
+            PreparedStatement preparedStatement = Connector.Connect().prepareStatement(sql);
+    
+            preparedStatement.setInt(1, newbaseSalary);
+    
+            preparedStatement.executeUpdate();
+            
+        } catch (Exception e) {
+
+            e.printStackTrace();
             
         }
 
+        System.out.println("base salary updated succesfully");
 
-	}
-	
-	
-
-
+    }
     
 }

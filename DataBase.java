@@ -1,16 +1,36 @@
-import java.util.*;
 import java.sql.*;
-import java.sql.Date;
+import java.util.ArrayList;
 
-public class Insert {
+public abstract class DataBase {
 	
+	static void InsertVisit(Visit visit) {
+		try {
+
+			String sql = " INSERT INTO visits (Date ,Prescription , PatientID , DoctorID , Price)values(?,?,?,?,?)";
+			PreparedStatement preparedStatement = Connector.Connect().prepareStatement(sql);
+		
+			
+			preparedStatement.setDate(1, visit.getDate());
+			preparedStatement.setString(2, visit.getPrescription());
+			preparedStatement.setInt(3, visit.getPatientID());
+			preparedStatement.setInt(4, visit.getDoctorID());
+			preparedStatement.setInt(5, visit.getPrice());
+			
+			preparedStatement.executeUpdate();
+			
+		}
+		catch(Exception e) {
+			e.printStackTrace();
+		}
+	}
+
 	static ArrayList <Doctor> Doctors = new ArrayList<Doctor>();
 	static ArrayList <Nurse> Nurses = new ArrayList<Nurse>();
 	static ArrayList <Patient> Patients = new ArrayList<Patient>();
 	static ArrayList <Personel> Personel = new ArrayList<Personel>();
 	static ArrayList <Visit> Visits = new ArrayList<Visit>();
 	
-	static void InsertDoc() {
+	static void ImportDoctors() {
 	
 		String FirstName=null;
 		String LastName=null;
@@ -60,7 +80,7 @@ public class Insert {
 	}
 
 	
-	static void InsertNurses() {
+	static void ImportNurses() {
 
 		try {
 			
@@ -96,7 +116,7 @@ public class Insert {
 		
 	}
 	
-	static void InsertPatients() {
+	static void ImportPatients() {
 
 		try {	
 			
@@ -125,7 +145,7 @@ public class Insert {
 		
 	}
 	
-	static void InsertPersonel() {
+	static void ImportPersonel() {
 
 		try {	
 			
@@ -156,7 +176,7 @@ public class Insert {
 	}
 	
 	
-	static void InsertVisits() {
+	static void ImportVisits() {
 		
 		try {
 			
@@ -357,88 +377,49 @@ public class Insert {
 		}
 		return new Patient(Firstname, Lastname, ID, Insurance, Password ,HasMassage);
 	}
-	
-	
-	// static void RenderDoctor( Doctor doctor ) {
-		
-	// 	try {
-	// 		String sql = "update doctors set FirstName = ? ,LastName = ? ,WorkExperience = ? , "
-	// 				+ "Specialty = ? , ID = ? ,IncomeInThisMonth = ? , Paidleave = ?,UnPaidleave = ?,Password = ? ,"
-	// 				+ "Fired = ? ,HasMassage = ? ,RatingNum = ? ,Rating = ? where ID = ?  ";
-	// 		PreparedStatement preparedStatement = Connector.Connect().prepareStatement(sql);
-			
-	// 		preparedStatement.setInt(14, doctor.getID());
-		
-	// 		preparedStatement.setString(1, doctor.getFirstName());
-	// 		preparedStatement.setString(2,doctor.getLastName() );
-	// 		preparedStatement.setInt(3, doctor.getWorkExperience() );
-	// 		preparedStatement.setString(4,doctor.getSpecialty() );
-	// 		preparedStatement.setInt(5, doctor.getID());
-	// 		preparedStatement.setInt(6,doctor.getIncome_In_Month() );
-	// 		preparedStatement.setInt(7,doctor.getPaid_leave() );
-	// 		preparedStatement.setInt(8,doctor.getUnpaid_leave() );
-	// 		preparedStatement.setString(9,doctor.getPassword() );
-	// 		preparedStatement.setBoolean(10, doctor.isFired() );
-	// 		preparedStatement.setBoolean(11,doctor.Has_massage() );
-	// 		preparedStatement.setInt(12,doctor.GetRatingNum() );
-	// 		preparedStatement.setInt(13,doctor.GetRating() );
-	
-	// 	    preparedStatement.executeUpdate();
-		
-	// 	}
-	// 	catch(Exception e) {
-	// 		e.printStackTrace();
-	// 	}
-	// }
-	
-	// static void RenderPatient(Patient patient) {
-	// 	try {
-	// 		String sql = "update patients set FirstName = ? ,LastName = ? , "
-	// 				+ " ID = ?,Insurance = ? ,Password = ? "
-	// 				+ ",HasMassage = ?  where ID = ?  ";
-	// 		PreparedStatement preparedStatement = Connector.Connect().prepareStatement(sql);
-			
-	// 		preparedStatement.setInt(7, patient.getID());
-			
-	// 		preparedStatement.setString(1, patient.getFirstName());
-	// 		preparedStatement.setString(2,patient.getLastname() );
-	// 		preparedStatement.setInt(3, patient.getID());
-	// 		preparedStatement.setString(4,patient.getInsurance() );
-	// 		preparedStatement.setString(5,patient.getPassword() );
-	// 		preparedStatement.setBoolean(6,patient.HasMassage() );
-			
-	
-	// 	    preparedStatement.executeUpdate();
-		
-	// 	}
-	// 	catch(Exception e) {
-	// 		e.printStackTrace();
-	// 	}
-	// }
-	
-	// static void RenderVisits(Visit visit) {
-	// 	try {
-	// 		String sql = "UPDATE visits SET ID = ? ,Date = ? , "
-	// 				+ " Prescription = ?,PatientID = ? ,DoctorID = ? "
-	// 				+ ",Price = ? ,IsRated = ?  where ID = ?  ";
-	// 		PreparedStatement preparedStatement = Connector.Connect().prepareStatement(sql);
-			
-	// 		preparedStatement.setInt(8, visit.getID());
-			
-	// 		preparedStatement.setInt(1, visit.getID());
-	// 		preparedStatement.setDate(2,visit.getDate() );
-	// 		preparedStatement.setString(3, visit.getPrescription());
-	// 		preparedStatement.setInt(4,visit.getPatientID() );
-	// 		preparedStatement.setInt(5,visit.getDoctorID() );
-	// 		preparedStatement.setInt(6,visit.getPrice() );
-	// 		preparedStatement.setBoolean(7,visit.GetIsRated() );
 
-	// 	    preparedStatement.executeUpdate();
-	
-	// 	}
-	// 	catch(Exception e) {
-	// 	e.printStackTrace();
-	// 	}
-	// }
+	static void Update(String table_name,String updatedParameter,String updatedValue,int ID) {
+		try {
+			String sql = "UPDATE "+table_name+" SET "+updatedParameter+"=? WHERE ID=?";
 
+			PreparedStatement preparedStatement = Connector.Connect().prepareStatement(sql);
+			preparedStatement.setString(1, updatedValue);
+			preparedStatement.setInt(2, ID);
+
+			preparedStatement.executeUpdate();
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	static void Update(String table_name,String updatedParameter,int updatedValue,int ID) {
+		try {
+			String sql = "UPDATE "+table_name+" SET "+updatedParameter+"=? WHERE ID=?";
+
+			PreparedStatement preparedStatement = Connector.Connect().prepareStatement(sql);
+			preparedStatement.setInt(1, updatedValue);
+			preparedStatement.setInt(2, ID);
+
+			preparedStatement.executeUpdate();
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	static void Update(String table_name,String updatedParameter,boolean updatedValue,int ID) {
+		try {
+			String sql = "UPDATE "+table_name+" SET "+updatedParameter+"=? WHERE ID=?";
+
+			PreparedStatement preparedStatement = Connector.Connect().prepareStatement(sql);
+			preparedStatement.setBoolean(1, updatedValue);
+			preparedStatement.setInt(2, ID);
+
+			preparedStatement.executeUpdate();
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 }

@@ -1,4 +1,3 @@
-
 import java.sql.*;
 // import java.sql.PreparedStatement;
 // import java.sql.Statement;
@@ -56,6 +55,14 @@ public class Login {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+        finally {
+			try {
+				Connector.close_connection();
+			} catch (SQLException e) {
+				
+				e.printStackTrace();
+			}
+		}
 
 	}
 
@@ -108,7 +115,7 @@ public class Login {
 
 						if (Password.equals(pass_resultSet.getString(1))){
 							pass_check = true;
-							strnig_input.close();
+							
 							// System.out.println("dash docotor nabord :(");
 							Dashboard.Doctor(Insert.Extract_Doctor(Integer.parseInt(ID)));
 						} else {
@@ -309,7 +316,7 @@ public class Login {
 
 						if (Password.equals(pass_resultSet.getString(1))){
 							pass_check = true;
-							strnig_input.close();
+							
 							// System.out.println("dash bimar nabord :(");
 							Dashboard.Patient(Insert.Extract_Patient(Integer.parseInt(ID)));
 						} else {

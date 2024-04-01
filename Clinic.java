@@ -9,7 +9,7 @@ class Clinic {
     static void ShowMenu(){
 
         Scanner int_input = new Scanner(System.in);
-
+     
         System.out.println("Please Choose Your Entry");
         System.out.println("1.Admin");
         System.out.println("2.Doctor");

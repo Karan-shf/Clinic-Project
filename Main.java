@@ -1,8 +1,10 @@
-// import java.sql.*;
+// import java.util.Scanner;
+
+import java.sql.*;
 
 public class Main {
     public static void main(String[] args) throws Exception {
-        
+    	
         // Patient.registery();
 
         // Insert.InsertPatients();
@@ -29,6 +31,13 @@ public class Main {
 
         Clinic.Welcome();
         Clinic.ShowMenu();
+
+        // String sql = "UPDATE Admins SET HasMassage=1";
+        // // String sql = "INSERT INTO Users VALUES ('femklf','fenwjk','fwnej','wfenkj')";
+        
+        // PreparedStatement preparedStatement = Connector.Connect().prepareStatement(sql);
+        // preparedStatement.executeUpdate();
+        // System.out.println("ok");
 
 
 

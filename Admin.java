@@ -107,6 +107,14 @@ class Admin {
             
         }
 
+        String sql2 = "UPDATE Admins SET HasMassage=0";
+        try {
+            PreparedStatement preparedStatement = Connector.Connect().prepareStatement(sql2);
+            preparedStatement.executeUpdate();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
     }
 
     //nurse entry confirmation()

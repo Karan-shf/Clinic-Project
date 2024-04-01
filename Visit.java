@@ -9,8 +9,9 @@ class Visit {
     private int DoctorID;
     private int price;
     private boolean isRated ;
-
-    public Visit(int iD, Date date, String prescription, int patientID, int doctorID, int price , boolean isRated ) {
+    private int NurseID ;
+    
+    public Visit(int iD, Date date, String prescription, int patientID, int doctorID, int price , boolean isRated , int NurseID ) {
         ID = iD;
         this.date = date;
         this.prescription = prescription;
@@ -18,6 +19,7 @@ class Visit {
         DoctorID = doctorID;
         this.price = price;
         this.isRated = isRated;
+        this.NurseID = NurseID ;
         
     }
     
@@ -53,16 +55,23 @@ class Visit {
         return price;
     } 
     
-    public String toString() {
-    	Patient patient = Insert.Extract_Patient(PatientID);
-    	Doctor doctor = Insert.Extract_Doctor(DoctorID);
-    	
-    	return "Date : " + date + "\n Visit ID : " + ID + "Patient's Name : " + patient.getFirstName() + " " + patient.getLastname()+
-    			"\t Doctor's Name : " + doctor.getFirstName() + " " + doctor.getLastName()
-    			+ "\n Prescripton : " + prescription;
+    public int getNurseID() {
+    	return NurseID;
     }
-    
-    
-    
+
+    public void ShowVisit(){
+        Patient patient = DataBase.Extract_Patient(this.getPatientID());
+    	Doctor doctor = DataBase.Extract_Doctor(this.getDoctorID());
+        String [] prescriptionss = prescription.split(",");
+
+        System.out.println("Visit ID: "+this.getID());
+        System.out.println("Date: "+this.getDate());
+        System.out.println("Patient's Name: "+patient.getFirstName()+" "+ patient.getLastName());
+        System.out.println("Doctor's Name: "+doctor.getFirstName()+" "+doctor.getLastName());
+        System.out.println("Prescripton:");
+        for (int i=1;i<=prescriptionss.length;i++) {
+            System.out.println(""+i+". "+prescriptionss[i-1]);
+        }
+    }
     
 }

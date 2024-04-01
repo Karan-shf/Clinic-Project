@@ -9,40 +9,41 @@ public class Login {
 	static void Admin(){
 
 		Scanner strnig_input = new Scanner(System.in);
-
-		String sql = "SELECT Username FROM admins";
+		Scanner int_input = new Scanner(System.in);
+		
+		String sql = "SELECT ID FROM admins";
         try {
 			PreparedStatement preparedStatement = Connector.Connect().prepareStatement(sql,ResultSet.TYPE_SCROLL_SENSITIVE,ResultSet.CONCUR_UPDATABLE);
 			ResultSet resultSet = preparedStatement.executeQuery(sql);
 
-			boolean username_check=false;
-			while (!username_check){
-				System.out.println("Enter Your Username:");
-				String UserName = strnig_input.nextLine();
+			boolean ID_check=false;
+			while (!ID_check){
+				System.out.println("Enter Your ID:");
+				int ID = int_input.nextInt();
 				resultSet.beforeFirst();
 				// resultSet.absolute(1);
 				while (resultSet.next()) {
-					if (UserName.equals(resultSet.getString(1))){
-						username_check = true;
+					if (ID == resultSet.getInt(1)){
+						ID_check = true;
 						break;
 					}
 				}
-				if (username_check) {
+				if (ID_check) {
 					boolean pass_check = false; 
 					while (!pass_check) {
 						System.out.println("Enter Your Password:");
 						String Password = strnig_input.nextLine();
-						String pass_sql = "SELECT Password FROM admins WHERE Username = ? ";
+						String pass_sql = "SELECT Password FROM admins WHERE ID = ? ";
 						PreparedStatement preparedStatement_pass = Connector.Connect().prepareStatement(pass_sql);
-						preparedStatement_pass.setString(1, UserName);
+						preparedStatement_pass.setInt(1, ID);
 						ResultSet pass_resultSet = preparedStatement_pass.executeQuery();
 						pass_resultSet.next();
 						// System.out.println(pass_resultSet.getString(1));
 						if (Password.equals(pass_resultSet.getString(1))){
 							pass_check = true;
-							strnig_input.close();
+							
 							// System.out.println("dash nabord :(");
-							Dashboard.Admin(Insert.Extract_Admin(UserName));
+							Dashboard.Admin(DataBase.Extract_Admin(ID));
 						} else {
 							System.out.println("wrong password");
 						}
@@ -70,7 +71,7 @@ public class Login {
 
 		Scanner strnig_input = new Scanner(System.in);
 
-		String sql = "SELECT ID FROM doctors";
+		String sql = "SELECT ID,Status FROM doctors";
 
         try {
 
@@ -89,7 +90,7 @@ public class Login {
 		
 				while (resultSet.next()) {
 
-					if (ID.equals(resultSet.getString(1))){
+					if (ID.equals(resultSet.getString(1)) && resultSet.getString(2).equals("is working")){
 						ID_check = true;
 						break;
 					}
@@ -117,7 +118,7 @@ public class Login {
 							pass_check = true;
 							
 							// System.out.println("dash docotor nabord :(");
-							Dashboard.Doctor(Insert.Extract_Doctor(Integer.parseInt(ID)));
+							Dashboard.Doctor(DataBase.Extract_Doctor(Integer.parseInt(ID)));
 						} else {
 							System.out.println("wrong password");
 						}
@@ -137,7 +138,7 @@ public class Login {
 
 		Scanner strnig_input = new Scanner(System.in);
 
-		String sql = "SELECT ID FROM nurses";
+		String sql = "SELECT ID,Status FROM nurses";
 
         try {
 
@@ -156,7 +157,7 @@ public class Login {
 		
 				while (resultSet.next()) {
 
-					if (ID.equals(resultSet.getString(1))){
+					if (ID.equals(resultSet.getString(1)) && resultSet.getString(2).equals("is working")){
 						ID_check = true;
 						break;
 					}
@@ -182,9 +183,9 @@ public class Login {
 
 						if (Password.equals(pass_resultSet.getString(1))){
 							pass_check = true;
-							strnig_input.close();
+							
 							// System.out.println("dash nurse nabord :(");
-							Dashboard.Nurse(Insert.Extract_Nurse(Integer.parseInt(ID)));
+							Dashboard.Nurse(DataBase.Extract_Nurse(Integer.parseInt(ID)));
 						} else {
 							System.out.println("wrong password");
 						}
@@ -204,7 +205,7 @@ public class Login {
 
 		Scanner strnig_input = new Scanner(System.in);
 
-		String sql = "SELECT ID FROM personel";
+		String sql = "SELECT ID,Status FROM personel";
 
         try {
 
@@ -223,7 +224,7 @@ public class Login {
 		
 				while (resultSet.next()) {
 
-					if (ID.equals(resultSet.getString(1))){
+					if (ID.equals(resultSet.getString(1)) && resultSet.getString(2).equals("is working")){
 						ID_check = true;
 						break;
 					}
@@ -249,9 +250,8 @@ public class Login {
 
 						if (Password.equals(pass_resultSet.getString(1))){
 							pass_check = true;
-							strnig_input.close();
 							// System.out.println("dash personel nabord :(");
-							Dashboard.Personel(Insert.Extract_Personel(Integer.parseInt(ID)));
+							Dashboard.Personel(DataBase.Extract_Personel(Integer.parseInt(ID)));
 						} else {
 							System.out.println("wrong password");
 						}
@@ -318,7 +318,7 @@ public class Login {
 							pass_check = true;
 							
 							// System.out.println("dash bimar nabord :(");
-							Dashboard.Patient(Insert.Extract_Patient(Integer.parseInt(ID)));
+							Dashboard.Patient(DataBase.Extract_Patient(Integer.parseInt(ID)));
 						} else {
 							System.out.println("wrong password");
 						}
